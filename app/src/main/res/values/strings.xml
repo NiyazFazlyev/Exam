@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Exam</string>
+
+    <string name="hello">Привет, Нияз!</string>
+    <string name="back">Назад</string>
+    <string name="next">Дальше</string>
+    <string name="hint">Подсказка</string>
+
+</resources>
