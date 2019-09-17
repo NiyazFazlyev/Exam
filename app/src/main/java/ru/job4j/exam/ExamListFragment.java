@@ -1,5 +1,7 @@
 package ru.job4j.exam;
 
+import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
@@ -22,12 +24,19 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
 
+import ru.job4j.exam.add.AddActivity;
+import ru.job4j.exam.add.ExamUpdateFragment;
 import ru.job4j.exam.store.ExamBaseHelper;
 import ru.job4j.exam.store.ExamDbSchema;
 
 public class ExamListFragment extends Fragment {
     private RecyclerView recycler;
     private SQLiteDatabase store;
+    private onTitleClickListener callback;
+
+    public interface onTitleClickListener {
+        void onTitleClicked(Exam exam);
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -57,10 +66,12 @@ public class ExamListFragment extends Fragment {
         while (!cursor.isAfterLast()) {
             exams.add(new Exam(
                     cursor.getInt(cursor.getColumnIndex("id")),
-                    cursor.getString(cursor.getColumnIndex("title")),
-                    System.currentTimeMillis(),
-                    80
+                    cursor.getString(cursor.getColumnIndex(ExamDbSchema.ExamTable.Cols.TITLE)),
+                    "description",
+                    cursor.getString(cursor.getColumnIndex(ExamDbSchema.ExamTable.Cols.DATE)),
+                    cursor.getInt(cursor.getColumnIndex(ExamDbSchema.ExamTable.Cols.RESULT))
             ));
+            //TODO добавить description
             cursor.moveToNext();
         }
         cursor.close();
@@ -79,11 +90,12 @@ public class ExamListFragment extends Fragment {
         // Handle item selection
         switch (item.getItemId()) {
             case R.id.add_exam:
-                FragmentManager fm = getActivity().getSupportFragmentManager();
-                fm.beginTransaction()
-                        .replace(R.id.exams, new ExamAddFragment())
-                        .addToBackStack(null)
-                        .commit();
+                startActivity(new Intent(getActivity(), AddActivity.class));
+//                FragmentManager fm = getActivity().getSupportFragmentManager();
+//                fm.beginTransaction()
+//                        .replace(R.id.exams, new ExamAddFragment())
+//                        .addToBackStack(null)
+//                        .commit();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -120,20 +132,30 @@ public class ExamListFragment extends Fragment {
         public void onBindViewHolder(@NonNull ExamHolder holder, int i) {
             Exam exam = this.exams.get(i);
             TextView text = holder.view.findViewById(R.id.q_text);
+            TextView res = holder.view.findViewById(R.id.res);
+            TextView date = holder.view.findViewById(R.id.date);
             if ((i % 2) == 0) {
                 holder.view.setBackgroundColor(Color.parseColor("#d8d8d8"));
             }
-            //TODO вывод результата и даты
 
             text.setText(exam.getName());
+            res.setText(String.valueOf(exam.getResult()) + "%");
+            date.setText(exam.getTime());
+
+            text.setOnClickListener(
+                    btn -> {
+                        callback.onTitleClicked(exam);
+                    }
+            );
             holder.view.findViewById(R.id.edit)
                     .setOnClickListener(
                             btn -> {
-                                FragmentManager fm = getActivity().getSupportFragmentManager();
-                                Fragment fragment = new ExamUpdateFragment();
                                 Bundle bundle = new Bundle();
                                 bundle.putInt("id", exam.getId());
                                 bundle.putString("name", exam.getName());
+                                bundle.putString("desc", exam.getDesc());
+                                FragmentManager fm = getActivity().getSupportFragmentManager();
+                                Fragment fragment = new ExamUpdateFragment();
                                 fragment.setArguments(bundle);
                                 fm.beginTransaction()
                                         .replace(R.id.exams, fragment)
@@ -156,5 +178,17 @@ public class ExamListFragment extends Fragment {
         public int getItemCount() {
             return this.exams.size();
         }
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        callback = (onTitleClickListener) context; // назначаем активити при присоединении фрагмента к активити
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        callback = null; // обнуляем ссылку при отсоединении фрагмента от активити
     }
 }

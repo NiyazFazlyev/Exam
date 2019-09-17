@@ -14,8 +14,15 @@
         android:text="Name" />
 
     <Button
+        android:id="@+id/new_question"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Add question" />
+
+    <Button
         android:id="@+id/save"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Save" />
+
 </LinearLayout>

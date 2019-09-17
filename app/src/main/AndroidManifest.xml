@@ -17,5 +17,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".add.AddActivity"></activity>
+        <activity android:name=".pass.PassActivity"></activity>
     </application>
 </manifest>

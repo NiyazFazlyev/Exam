@@ -1,14 +1,17 @@
 
 package ru.job4j.exam;
 
+
 public class Exam {
     private int id;
     private String name;
-    private long time;
+    private String desc;
+    private String time;
     private int result;
 
-    public Exam(int id, String name, long time, int result) {
+    public Exam(int id, String name, String desc, String time, int result) {
         this.id = id;
+        this.desc = desc;
         this.name = name;
         this.time = time;
         this.result = result;
@@ -18,7 +21,11 @@ public class Exam {
         return name;
     }
 
-    public long getTime() {
+    public String getDesc() {
+        return desc;
+    }
+
+    public String getTime() {
         return time;
     }
 
