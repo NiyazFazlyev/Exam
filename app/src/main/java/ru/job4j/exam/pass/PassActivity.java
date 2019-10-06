@@ -9,9 +9,6 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 import ru.job4j.exam.R;
-import ru.job4j.exam.add.ExamAddFragment;
-import ru.job4j.exam.add.ExamUpdateFragment;
-import ru.job4j.exam.store.ExamBaseHelper;
 
 public class PassActivity extends AppCompatActivity implements DescriptionFragment.onStartButtonClickListener {
     FragmentManager fm = getSupportFragmentManager();

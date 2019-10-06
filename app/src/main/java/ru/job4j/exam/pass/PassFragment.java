@@ -1,7 +1,6 @@
 package ru.job4j.exam.pass;
 
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,11 +18,11 @@ import androidx.fragment.app.FragmentManager;
 import java.util.ArrayList;
 
 import ru.job4j.exam.R;
-import ru.job4j.exam.store.ExamBaseHelper;
 import ru.job4j.exam.store.ExamDbSchema;
+import ru.job4j.exam.store.Store;
 
 public class PassFragment extends Fragment {
-    private SQLiteDatabase store;
+    private Store store;
     Cursor questions;
     ArrayList<Integer> answers = new ArrayList<>();
     ArrayList<Integer> correctAnswers = new ArrayList<>();
@@ -33,7 +32,7 @@ public class PassFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         this.view = inflater.inflate(R.layout.pass_fragment, container, false);
         Bundle args = getArguments();
-        this.store = new ExamBaseHelper(getActivity()).getWritableDatabase();
+        this.store = Store.getStore(getContext());
         getQuestions(String.valueOf(args.getInt("examId")));
         setQuestionText();
         questions.moveToNext();
@@ -68,11 +67,7 @@ public class PassFragment extends Fragment {
 
     private void getQuestions(String examId) {
         String condition = ExamDbSchema.QuestionTable.Cols.EXAM_ID + " = " + examId;
-        questions = this.store.query(
-                ExamDbSchema.QuestionTable.NAME,
-                null, condition, null,
-                null, null, null
-        );
+        questions = this.store.find(ExamDbSchema.QuestionTable.NAME, condition);
         questions.moveToFirst();
     }
 
@@ -86,11 +81,7 @@ public class PassFragment extends Fragment {
             correctAnswers.add(questions.getInt(questions.getColumnIndex(ExamDbSchema.QuestionTable.Cols.ANSWER)));
 
             String condition = ExamDbSchema.OptionTable.Cols.QUESTION_ID + " = " + questions.getString(questions.getColumnIndex("id"));
-            Cursor options = this.store.query(
-                    ExamDbSchema.OptionTable.NAME,
-                    null, condition, null,
-                    null, null, null
-            );
+            Cursor options = this.store.find(ExamDbSchema.OptionTable.NAME, condition);
             options.moveToFirst();
 
             for (int index = 0; index != variants.getChildCount(); index++) {

@@ -3,7 +3,6 @@ package ru.job4j.exam;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -26,12 +25,12 @@ import java.util.List;
 
 import ru.job4j.exam.add.AddActivity;
 import ru.job4j.exam.add.ExamUpdateFragment;
-import ru.job4j.exam.store.ExamBaseHelper;
 import ru.job4j.exam.store.ExamDbSchema;
+import ru.job4j.exam.store.Store;
 
 public class ExamListFragment extends Fragment {
     private RecyclerView recycler;
-    private SQLiteDatabase store;
+    private Store store;
     private onTitleClickListener callback;
 
     public interface onTitleClickListener {
@@ -50,18 +49,15 @@ public class ExamListFragment extends Fragment {
         View view = inflater.inflate(R.layout.list_fragment, container, false);
         this.recycler = view.findViewById(R.id.list);
         this.recycler.setLayoutManager(new LinearLayoutManager(getActivity()));
-        this.store = new ExamBaseHelper(this.getContext()).getWritableDatabase();
+        this.store = Store.getStore(getContext());
         updateUI();
         return view;
     }
 
     private void updateUI() {
         List<Exam> exams = new ArrayList<Exam>();
-        Cursor cursor = this.store.query(
-                ExamDbSchema.ExamTable.NAME,
-                null, null, null,
-                null, null, null
-        );
+        Cursor cursor = this.store.find(
+                ExamDbSchema.ExamTable.NAME, null);
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
             exams.add(new Exam(
@@ -167,7 +163,7 @@ public class ExamListFragment extends Fragment {
             holder.view.findViewById(R.id.delete)
                     .setOnClickListener(
                             btn -> {
-                                store.delete(ExamDbSchema.ExamTable.NAME, "id = ?", new String[]{String.valueOf(exam.getId())});
+                                store.delete(ExamDbSchema.ExamTable.NAME, "id = " + String.valueOf(exam.getId()));
                                 exams.remove(exam);
                                 notifyItemRemoved(i);
                             }

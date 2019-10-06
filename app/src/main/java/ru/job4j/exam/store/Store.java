@@ -6,32 +6,34 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 public class Store {
-    private static SQLiteDatabase store;
+    private static Store store;
+    private static SQLiteDatabase db;
 
     private Store() {
     }
 
-    public static SQLiteDatabase getStore(Context context) {
+    public static Store getStore(Context context) {
         if (store == null) {
-            store = new ExamBaseHelper(context).getWritableDatabase();
+            store = new Store();
+            db = new ExamBaseHelper(context).getWritableDatabase();
         }
         return store;
     }
 
     public long add(String table, ContentValues newValue) {
-        return this.store.insert(table, null, newValue);
+        return this.db.insert(table, null, newValue);
     }
 
     public long update(String table, ContentValues newValue, String condition) {
-        return store.update(table, newValue, condition, null);
+        return this.db.update(table, newValue, condition, null);
     }
 
     public long delete(String table, String condition) {
-        return store.delete(table, condition, null);
+        return this.db.delete(table, condition, null);
     }
 
     public Cursor find(String table, String condition){
-        return this.store.query(
+        return this.db.query(
                 table,
                 null, condition, null,
                 null, null, null

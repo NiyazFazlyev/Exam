@@ -2,7 +2,6 @@ package ru.job4j.exam.add;
 
 import android.content.ContentValues;
 import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
@@ -18,19 +17,19 @@ import ru.job4j.exam.ExamListActivity;
 import ru.job4j.exam.Option;
 import ru.job4j.exam.Question;
 import ru.job4j.exam.R;
-import ru.job4j.exam.store.ExamBaseHelper;
 import ru.job4j.exam.store.ExamDbSchema;
+import ru.job4j.exam.store.Store;
 
 public class AddActivity extends AppCompatActivity implements QuestionAddFragment.OnAddQuestionButtonClickListener,
         ExamAddFragment.OnAddExamButtonClickListener {
     private final List<Question> newQuestions = new ArrayList();
-    private SQLiteDatabase store;
+    private Store store;
 
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        this.store = new ExamBaseHelper(this).getWritableDatabase();
+        this.store = Store.getStore(this);
         setContentView(R.layout.add_activity);
         FragmentManager fm = getSupportFragmentManager();
         Fragment fragment = fm.findFragmentById(R.id.add_container);
@@ -45,7 +44,6 @@ public class AddActivity extends AppCompatActivity implements QuestionAddFragmen
     @Override
     public void onAddQuestionButtonClicked(Question question) {
         newQuestions.add(question);
-
     }
 
     @Override
@@ -55,7 +53,7 @@ public class AddActivity extends AppCompatActivity implements QuestionAddFragmen
         value.put(ExamDbSchema.ExamTable.Cols.RESULT, 0);
         Date date = new Date();
         value.put(ExamDbSchema.ExamTable.Cols.DATE, date.getDate());
-        long examId = this.store.insert(ExamDbSchema.ExamTable.NAME, null, value);
+        long examId = this.store.add(ExamDbSchema.ExamTable.NAME, value);
         value.clear();
         int position = 0;
         for (Question question : newQuestions) {
@@ -64,13 +62,13 @@ public class AddActivity extends AppCompatActivity implements QuestionAddFragmen
             newQuestion.put(ExamDbSchema.QuestionTable.Cols.TEXT, question.getText());
             newQuestion.put(ExamDbSchema.QuestionTable.Cols.POSITION, position++);
             newQuestion.put(ExamDbSchema.QuestionTable.Cols.ANSWER, question.getAnswer());
-            long questionId = this.store.insert(ExamDbSchema.QuestionTable.NAME, null, newQuestion);
+            long questionId = this.store.add(ExamDbSchema.QuestionTable.NAME, newQuestion);
             newQuestion.clear();
             for (Option option : question.getOptions()) {
                 ContentValues newOption = new ContentValues();
                 newOption.put(ExamDbSchema.OptionTable.Cols.QUESTION_ID, questionId);
                 newOption.put(ExamDbSchema.OptionTable.Cols.TEXT, option.getText());
-                this.store.insert(ExamDbSchema.OptionTable.NAME, null, newOption);
+                this.store.add(ExamDbSchema.OptionTable.NAME, newOption);
                 newOption.clear();
             }
         }
